@@ -14,5 +14,5 @@ spring:
 
 app:
   jwt:
-    secret: 6285316d6080a266f62fb9c164c2112a52f9ea754f63ef37fc877fc5359343a58dbbbc6e
+    secret: ${JWT_SECRET}
     expiration-ms: 86400000 # 24 giờ
