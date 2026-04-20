@@ -3,10 +3,11 @@ package com.thanhpham.product_idea_validator.auth.DTO;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.Data;
-import lombok.Getter;
 
-@Data
+import lombok.Getter;
+import lombok.Setter;
+
+@Setter
 @Getter
 public class RegisterRequest {
 
