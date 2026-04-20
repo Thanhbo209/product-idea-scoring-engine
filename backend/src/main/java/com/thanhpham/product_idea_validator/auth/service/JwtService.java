@@ -25,9 +25,6 @@ public class JwtService {
 
     public String generateToken(UUID userId, String email, String role) {
         return Jwts.builder()
-                // Sử dụng userId làm subject của token vì email có thể thay đổi, nhưng userId
-                // thì không
-                .subject(userId.toString())
                 .claims(Map.of(
                         "userId", userId.toString(),
                         "email", email,
@@ -35,6 +32,7 @@ public class JwtService {
                 .issuedAt(new Date()) // thời điểm token được tạo
                 .expiration(new Date(System.currentTimeMillis() + jwtExpirationMs)) // thời điểm token hết hạn
                 .signWith(getSigningKey()) // ký token bằng khóa bí mật
+                .subject(userId.toString())
                 .compact(); // tạo token dưới dạng chuỗi compact (header.payload.signature)
     }
 
@@ -85,3 +83,5 @@ public class JwtService {
 // nhân.
 // Thêm role vào token để dễ dàng kiểm tra quyền truy cập mà không cần phải truy
 // vấn cơ sở dữ liệu mỗi lần xác thực token.
+// Sử dụng Claims để lưu trữ thông tin tùy chỉnh (userId, email, role) trong
+// token, giúp việc trích xuất thông tin này dễ dàng hơn khi xác thực token.
