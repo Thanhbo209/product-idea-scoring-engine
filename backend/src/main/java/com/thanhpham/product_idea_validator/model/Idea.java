@@ -10,6 +10,8 @@ import java.util.UUID;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import com.thanhpham.product_idea_validator.user.model.User;
+
 @Entity
 @Table(name = "ideas")
 @Getter
