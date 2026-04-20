@@ -1,7 +1,10 @@
-package com.thanhpham.product_idea_validator.model;
+package com.thanhpham.product_idea_validator.user.model;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import com.thanhpham.product_idea_validator.model.BaseEntity;
+import com.thanhpham.product_idea_validator.model.Idea;
 
 import jakarta.persistence.*;
 import lombok.*;
