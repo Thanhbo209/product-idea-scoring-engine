@@ -1,12 +1,12 @@
 package com.thanhpham.product_idea_validator.auth.service;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import com.thanhpham.product_idea_validator.auth.DTO.AuthResponse;
 import com.thanhpham.product_idea_validator.auth.DTO.LoginRequest;
 import com.thanhpham.product_idea_validator.auth.DTO.RegisterRequest;
@@ -47,7 +47,11 @@ public class AuthService {
                 .isVerified(false)
                 .build();
 
-        userRepository.save(user);
+        try {
+            userRepository.save(user);
+        } catch (DataIntegrityViolationException e) {
+            throw new IllegalArgumentException("Email is already in use", e);
+        }
 
         String token = jwtService.generateToken(user.getId(), user.getEmail(), user.getRole().name());
 
@@ -76,7 +80,6 @@ public class AuthService {
         // throw new IllegalStateException("Email not verified");
         // }
 
-        // Tạo token JWT với thông tin người dùng
         String token = jwtService.generateToken(
                 user.getId(),
                 user.getEmail(),
