@@ -3,26 +3,22 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
 type RequestOptions = {
   method?: string;
   body?: unknown;
-  token?: string;
 };
 
 async function request<T>(
   endpoint: string,
   options: RequestOptions = {},
 ): Promise<T> {
-  const { method = "GET", body, token } = options;
+  const { method = "GET", body } = options;
 
   const headers: HeadersInit = {
     "Content-Type": "application/json",
   };
 
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
-  }
-
   const res = await fetch(`${BASE_URL}${endpoint}`, {
     method,
     headers,
+    credentials: "include",
     body: body ? JSON.stringify(body) : undefined,
   });
 
@@ -37,15 +33,13 @@ async function request<T>(
 }
 
 export const api = {
-  post: <T>(endpoint: string, body: unknown, token?: string) =>
-    request<T>(endpoint, { method: "POST", body, token }),
+  post: <T>(endpoint: string, body: unknown) =>
+    request<T>(endpoint, { method: "POST", body }),
 
-  get: <T>(endpoint: string, token?: string) =>
-    request<T>(endpoint, { method: "GET", token }),
+  get: <T>(endpoint: string) => request<T>(endpoint, { method: "GET" }),
 
-  put: <T>(endpoint: string, body: unknown, token?: string) =>
-    request<T>(endpoint, { method: "PUT", body, token }),
+  put: <T>(endpoint: string, body: unknown) =>
+    request<T>(endpoint, { method: "PUT", body }),
 
-  delete: <T>(endpoint: string, token?: string) =>
-    request<T>(endpoint, { method: "DELETE", token }),
+  delete: <T>(endpoint: string) => request<T>(endpoint, { method: "DELETE" }),
 };

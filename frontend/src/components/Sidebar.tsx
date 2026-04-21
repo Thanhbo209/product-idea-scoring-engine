@@ -17,8 +17,9 @@ import {
   Lightbulb,
 } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { authApi } from "@/lib/authApi";
 
 const NAV_ITEMS = [
   {
@@ -76,14 +77,26 @@ export default function Sidebar({
   const { user, clearAuth } = useAuthStore();
   const { resolvedTheme, setTheme } = useTheme();
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [mounted, setMounted] = useState(false);
   const isDark = resolvedTheme === "dark";
 
-  const handleLogout = () => {
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await authApi.logout();
+    } catch (e) {
+      // ignore hoặc log
+    }
+
     clearAuth();
-    document.cookie = "auth-token=; path=/; max-age=0";
+
     window.location.href = "/auth/login";
   };
-
   return (
     <>
       {/* Mobile backdrop */}
@@ -126,6 +139,7 @@ export default function Sidebar({
           <Button
             onClick={onToggle}
             variant="ghost"
+            aria-label={open ? "Collapse sidebar" : "Expand sidebar"}
             size="icon"
             className={["w-7 h-7 shrink-0", !open && "hidden lg:flex"].join(
               " ",
@@ -137,29 +151,32 @@ export default function Sidebar({
 
         {/* ── New Idea ── */}
         <div className="px-2 pt-2 pb-1 shrink-0">
-          <Link
-            href={authenticated ? "/ideas/new" : "/auth/login"}
-            className="block"
-          >
-            {open ? (
-              <Button
-                variant="ghost"
-                className="w-full justify-start gap-2 h-9 text-sm"
-              >
-                <Plus size={15} />
-                New Idea
-              </Button>
-            ) : (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="w-full h-9"
-                title="New Idea"
-              >
-                <Plus size={15} />
-              </Button>
-            )}
-          </Link>
+          {open ? (
+            <Button
+              render={
+                <Link href={authenticated ? "/ideas/new" : "/auth/login"} />
+              }
+              nativeButton={false}
+              variant="ghost"
+              className="w-full justify-start gap-2 h-9 text-sm"
+            >
+              <Plus size={15} />
+              New Idea
+            </Button>
+          ) : (
+            <Button
+              render={
+                <Link href={authenticated ? "/ideas/new" : "/auth/login"} />
+              }
+              nativeButton={false}
+              variant="ghost"
+              size="icon"
+              className="w-full h-9"
+              title="New Idea"
+            >
+              <Plus size={15} />
+            </Button>
+          )}
         </div>
 
         {/* ── Nav ── */}
@@ -241,7 +258,8 @@ export default function Sidebar({
                   className="text-muted-foreground/25 mb-2"
                 />
                 <p className="text-xs text-muted-foreground/50 leading-relaxed">
-                  Đăng nhập để lưu lịch sử ý tưởng
+                  Log In to view your chat history and continue your
+                  conversations with IV.
                 </p>
               </div>
             )
@@ -371,6 +389,7 @@ export default function Sidebar({
       {!open && (
         <button
           onClick={onToggle}
+          aria-label="Open sidebar"
           className="fixed top-4 left-4 z-40 lg:hidden p-2 rounded-md bg-background
                      border border-border text-muted-foreground hover:text-foreground
                      hover:bg-accent transition-colors"

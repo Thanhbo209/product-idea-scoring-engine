@@ -4,7 +4,7 @@ const PUBLIC_ROUTES = ["/auth/login", "/auth/register"];
 const DEFAULT_REDIRECT = "/dashboard";
 const LOGIN_PATH = "/auth/login";
 
-export function middleware(req: NextRequest) {
+export function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const token = req.cookies.get("auth-token")?.value;
 

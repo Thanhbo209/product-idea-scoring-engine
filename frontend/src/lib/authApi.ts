@@ -7,4 +7,8 @@ export const authApi = {
 
   login: (data: LoginRequest) =>
     api.post<AuthResponse>("/api/auth/login", data),
+
+  logout: () => api.post<void>("/api/auth/logout", {}),
+
+  me: () => api.get<AuthResponse>("/api/auth/me"),
 };

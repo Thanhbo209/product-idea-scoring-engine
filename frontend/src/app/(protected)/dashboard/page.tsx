@@ -31,7 +31,7 @@ const METRIC_CARDS = [
 
 export default function DashboardPage() {
   const { user } = useAuthStore();
-  const firstName = user?.fullName?.split(" ").pop() ?? "there";
+  const firstName = user?.fullName?.split(" ")[0] ?? "there";
 
   return (
     <div className="p-8 max-w-full mx-auto space-y-8">
@@ -46,7 +46,7 @@ export default function DashboardPage() {
           </p>
         </div>
         <Link
-          href="/dashboard/ideas/new"
+          href="/ideas/new"
           className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium
                      bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shrink-0"
         >
@@ -84,7 +84,7 @@ export default function DashboardPage() {
               Recent ideas
             </h2>
             <Link
-              href="/dashboard/ideas"
+              href="/ideas"
               className="text-xs text-primary hover:underline"
             >
               View all
@@ -99,7 +99,7 @@ export default function DashboardPage() {
               />
               <p className="text-sm text-muted-foreground">No ideas yet.</p>
               <Link
-                href="/dashboard/ideas/new"
+                href="/ideas/new"
                 className="inline-flex items-center gap-1.5 mt-3 text-xs text-primary hover:underline"
               >
                 <Plus size={12} /> Create your first idea

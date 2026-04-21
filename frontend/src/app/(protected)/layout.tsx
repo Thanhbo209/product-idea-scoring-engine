@@ -3,21 +3,35 @@
 import SidebarShell from "@/components/SidebarShell";
 import { useAuthStore } from "@/store/authStore";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { authApi } from "@/lib/authApi";
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { user } = useAuthStore();
+  const { user, setAuth, clearAuth } = useAuthStore();
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    if (!user) router.replace("/auth/login");
-  }, [user, router]);
+    const fetchMe = async () => {
+      try {
+        const me = await authApi.me(); // 🔥 server source of truth
+        setAuth(me);
+      } catch {
+        clearAuth();
+        router.replace("/auth/login");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  if (!user) return null;
+    fetchMe();
+  }, [router, setAuth, clearAuth]);
 
-  return <SidebarShell authenticated={true}>{children}</SidebarShell>;
+  if (loading) return null;
+
+  return <SidebarShell authenticated={!!user}>{children}</SidebarShell>;
 }

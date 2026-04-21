@@ -32,18 +32,26 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
 
-        final String authHeader = request.getHeader("Authorization");
-        final String email;
+        String jwt = null;
+        String email = null;
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        if (request.getCookies() != null) {
+            for (var cookie : request.getCookies()) {
+                if ("auth-token".equals(cookie.getName())) {
+                    jwt = cookie.getValue();
+                    break;
+                }
+            }
+        }
+
+        if (jwt == null) {
             filterChain.doFilter(request, response);
             return;
         }
-
-        final String jwt = authHeader.substring(7);
         try {
             email = jwtService.extractEmail(jwt);
         } catch (Exception e) {
+            System.out.println("JWT extract failed: " + e.getMessage());
             filterChain.doFilter(request, response);
             return;
         }

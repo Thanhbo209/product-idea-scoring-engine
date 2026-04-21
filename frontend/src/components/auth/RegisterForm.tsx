@@ -21,7 +21,8 @@ export const RegisterForm = () => {
   const validate = () => {
     const next: Record<string, string> = {};
     if (!form.fullName.trim()) next.fullName = "Please fill out full name";
-    if (!form.email.includes("@")) next.email = "Email or password is invalid";
+    if (!/^\S+@\S+\.\S+$/.test(form.email))
+      next.email = "Email or password is invalid";
     if (form.password.length < 6)
       next.password = "Password must be at least 6 characters";
     return next;
@@ -38,7 +39,7 @@ export const RegisterForm = () => {
     setLoading(true);
     try {
       const res = await authApi.register(form);
-      setAuth(res.accessToken, {
+      setAuth({
         userId: res.userId,
         email: res.email,
         fullName: res.fullName,
@@ -109,6 +110,7 @@ export const RegisterForm = () => {
             className="w-full px-3 py-2 border border-border  text-sm
                            focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
                            placeholder:text-muted-foreground"
+            autoComplete="new-password"
           />
         </div>
 
