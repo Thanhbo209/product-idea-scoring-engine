@@ -55,7 +55,7 @@ export const RegisterForm = () => {
     }
   };
   return (
-    <div className="bg-card border border-border rounded-xl p-8">
+    <div className="bg-card  border border-border p-8">
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
           <label className="block text-sm font-medium  mb-1">Full Name</label>
@@ -70,7 +70,7 @@ export const RegisterForm = () => {
             value={form.fullName}
             onChange={handleChange}
             placeholder="John Doe"
-            className="w-full px-3 py-2 border border-border rounded-lg text-sm
+            className="w-full px-3 py-2 border border-border  text-sm
                            focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
                            placeholder:text-muted-foreground"
           />
@@ -87,7 +87,7 @@ export const RegisterForm = () => {
             value={form.email}
             onChange={handleChange}
             placeholder="you@example.com"
-            className="w-full px-3 py-2 border border-border rounded-lg text-sm
+            className="w-full px-3 py-2 border border-border  text-sm
                            focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
                            placeholder:text-muted-foreground"
           />
@@ -106,14 +106,14 @@ export const RegisterForm = () => {
             value={form.password}
             onChange={handleChange}
             placeholder="At least 6 characters"
-            className="w-full px-3 py-2 border border-border rounded-lg text-sm
+            className="w-full px-3 py-2 border border-border  text-sm
                            focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
                            placeholder:text-muted-foreground"
           />
         </div>
 
         {errors.general && (
-          <p className="text-sm text-destructive bg-destructive border border-border rounded-lg px-3 py-2">
+          <p className="text-sm text-destructive bg-destructive border border-border  px-3 py-2">
             {errors.general}
           </p>
         )}
@@ -122,7 +122,7 @@ export const RegisterForm = () => {
           type="submit"
           disabled={loading}
           className="w-full py-2.5 px-4 bg-primary text-background hover:bg-primary/80
-                         text-sm font-medium rounded-lg
+                         text-sm font-medium 
                          transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? "Creating your account..." : "Sign Up"}

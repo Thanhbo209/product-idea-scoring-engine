@@ -43,7 +43,7 @@ export const LoginForm = () => {
     <div className=" border border-border rounded-xl p-8">
       <form onSubmit={handleSubmit} className="space-y-5">
         {error && (
-          <p className="text-sm text-destructive bg-card border border-border rounded-lg px-3 py-2">
+          <p className="text-sm text-destructive bg-card border border-border px-3 py-2">
             {error}
           </p>
         )}
@@ -56,7 +56,7 @@ export const LoginForm = () => {
             onChange={handleChange}
             placeholder="you@example.com"
             required
-            className="w-full px-3 py-2 border border-border rounded-lg text-sm
+            className="w-full px-3 py-2 border border-border  text-sm
                            focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent
                            placeholder:text-muted-foreground"
           />
@@ -72,7 +72,7 @@ export const LoginForm = () => {
             onChange={handleChange}
             placeholder="••••••••"
             required
-            className="w-full px-3 py-2 border border-border rounded-lg text-sm
+            className="w-full px-3 py-2 border border-border  text-sm
                            focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent
                            placeholder:text-muted-foreground"
           />
@@ -82,7 +82,7 @@ export const LoginForm = () => {
           type="submit"
           disabled={loading}
           className="w-full py-2.5 px-4 bg-primary hover:bg-primary/80
-                          text-sm font-medium rounded-lg text-white
+                          text-sm font-medium text-white
                          transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? "Logging you in..." : "Log In"}
