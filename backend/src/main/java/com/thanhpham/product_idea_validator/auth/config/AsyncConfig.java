@@ -22,8 +22,11 @@ public class AsyncConfig {
         executor.setThreadNamePrefix("ai-eval-");
         executor.setKeepAliveSeconds(60);
 
-        // If queue full: caller thread runs the task (graceful degradation to sync)
-        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        // If queue full: fail fast so the enqueue path can return an explicit
+        // retry/overload response
+        // or mark the evaluation as failed instead of running AI work on request
+        // threads.
+        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
 
         executor.initialize();
         return executor;

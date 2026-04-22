@@ -1,6 +1,7 @@
 package com.thanhpham.product_idea_validator.idea.service;
 
 import com.thanhpham.product_idea_validator.idea.exception.EvaluationConflictException;
+import com.thanhpham.product_idea_validator.idea.exception.IdeaVersionNotFoundException;
 import com.thanhpham.product_idea_validator.idea.mapper.IdeaMapper;
 import com.thanhpham.product_idea_validator.idea.repository.IdeaVersionRepository;
 import com.thanhpham.product_idea_validator.model.IdeaVersion;
@@ -31,7 +32,7 @@ public class AiEvaluationService {
     @Transactional
     public void markAsInProgress(UUID versionId) {
         IdeaVersion version = versionRepository.findById(versionId)
-                .orElseThrow(() -> new RuntimeException("Version not found: " + versionId));
+                .orElseThrow(() -> new IdeaVersionNotFoundException(versionId));
 
         EvaluationStatus status = ideaMapper.deriveStatus(version);
 
@@ -97,8 +98,9 @@ public class AiEvaluationService {
         } catch (Exception ex) {
             log.error("AI evaluation failed for version {}: {}", versionId, ex.getMessage());
             // Mark as FAILED — allows retry
-            version.setAiFeedback("__FAILED__:" + ex.getMessage());
-            versionRepository.save(version);
+            log.error("AI evaluation failed for version {}", versionId, ex);
+
+            versionRepository.markFailedIfNotEvaluated(versionId);
         }
 
         return CompletableFuture.completedFuture(null);
@@ -115,4 +117,5 @@ public class AiEvaluationService {
             return true;
         }
     }
+
 }

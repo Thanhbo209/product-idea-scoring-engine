@@ -32,4 +32,5 @@ public interface IdeaRepository extends JpaRepository<Idea, UUID> {
     Optional<Idea> findByShareToken(String shareToken);
 
     boolean existsByShareToken(String shareToken);
+
 }

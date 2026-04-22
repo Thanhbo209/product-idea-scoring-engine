@@ -5,7 +5,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class AiApiClient {
-
+    // TODO: replace with real AI integration; this stub returns fixed scores
+    // and will make every evaluation indistinguishable in production.
     public AiResult evaluate(
             String description,
             String problem,

@@ -60,8 +60,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(auth);
             }
 
-        } catch (Exception e) {
-            logger.warn("JWT validation failed: " + e.getMessage());
+        } catch (io.jsonwebtoken.JwtException | org.springframework.security.core.AuthenticationException e) {
+            logger.warn("JWT validation failed: {}", e);
         }
 
         filterChain.doFilter(request, response);

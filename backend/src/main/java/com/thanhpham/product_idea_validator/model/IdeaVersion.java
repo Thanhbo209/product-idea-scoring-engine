@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "idea_versions")
+@Table(name = "idea_versions", uniqueConstraints = @UniqueConstraint(columnNames = { "idea_id", "version_number" }))
 @EntityListeners(AuditingEntityListener.class)
 @Getter
 @Setter

@@ -86,9 +86,14 @@ public class IdeaMapper {
         if (v.getAiFeedback() == null)
             return EvaluationStatus.NOT_EVALUATED;
         if (v.getAiFeedback().startsWith("__PENDING__")) {
-            long startedAt = Long.parseLong(v.getAiFeedback().split(":")[1]);
-            boolean stale = Instant.now().toEpochMilli() - startedAt > Duration.ofMinutes(5).toMillis();
-            return stale ? EvaluationStatus.FAILED : EvaluationStatus.PENDING;
+            try {
+                String[] parts = v.getAiFeedback().split(":", 2);
+                long startedAt = Long.parseLong(parts[1]);
+                boolean stale = Instant.now().toEpochMilli() - startedAt > Duration.ofMinutes(5).toMillis();
+                return stale ? EvaluationStatus.FAILED : EvaluationStatus.PENDING;
+            } catch (RuntimeException ex) {
+                return EvaluationStatus.FAILED;
+            }
         }
         if (v.getAiFeedback().startsWith("__FAILED__"))
             return EvaluationStatus.FAILED;

@@ -25,12 +25,12 @@ public class JwtService {
 
     public String generateToken(UUID userId, String email, String role) {
         return Jwts.builder()
-                .subject(email) // sử dụng email làm subject để dễ dàng trích xuất thông tin người dùng
-                .claims(Map.of("role", role))
-                .issuedAt(new Date()) // thời điểm token được tạo
-                .expiration(new Date(System.currentTimeMillis() + jwtExpirationMs)) // thời điểm token hết hạn
-                .signWith(getSigningKey()) // ký token bằng khóa bí mật
-                .compact(); // tạo token dưới dạng chuỗi compact (header.payload.signature)
+                .subject(email)
+                .claims(Map.of("userId", userId.toString(), "role", role))
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
+                .signWith(getSigningKey())
+                .compact();
     }
 
     // Lấy khóa ký từ chuỗi bí mật
@@ -56,6 +56,10 @@ public class JwtService {
     // role từ token
     public String extractUserRole(String token) {
         return extractClaim(token, claims -> claims.get("role", String.class));
+    }
+
+    public UUID extractUserId(String token) {
+        return UUID.fromString(extractClaim(token, c -> c.get("userId", String.class)));
     }
 
     // Kiểm tra tính hợp lệ của token

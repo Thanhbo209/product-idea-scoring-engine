@@ -95,7 +95,7 @@ public class IdeaService {
         Idea idea = getAndAssertOwner(ideaId, userId);
 
         if (idea.getStatus() != Idea.Status.DRAFT) {
-            throw new InvalidStateTransitionException(idea.getStatus(), null);
+            throw new IllegalStateException("Only DRAFT ideas can be deleted");
         }
 
         boolean hasPendingEvaluation = idea.getVersions().stream()

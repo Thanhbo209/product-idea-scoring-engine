@@ -11,8 +11,12 @@ import com.thanhpham.product_idea_validator.model.Idea;
 import com.thanhpham.product_idea_validator.model.IdeaVersion;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
 import java.util.UUID;
@@ -27,39 +31,50 @@ public class IdeaVersionService {
     private final AiEvaluationService aiEvaluationService;
     private final IdeaMapper ideaMapper;
 
-    // ── CREATE VERSION ────────────────────────────────────────────────────────
-
     @Transactional
     public IdeaVersionResponse create(UUID ideaId, CreateVersionRequest req, UUID userId) {
-        // PESSIMISTIC_WRITE lock on idea — prevents version_number race condition
+
         Idea idea = ideaService.getAndAssertOwner(ideaId, userId);
 
-        int nextVersionNumber = versionRepository.findMaxVersionNumber(ideaId) + 1;
+        int maxRetries = 3;
 
-        IdeaVersion version = IdeaVersion.builder()
-                .idea(idea)
-                .versionNumber(nextVersionNumber)
-                .description(req.description())
-                .problem(req.problem())
-                .targetUsers(req.targetUsers())
-                .monetization(req.monetization())
-                .risks(req.risks())
-                .build();
+        for (int attempt = 1; attempt <= maxRetries; attempt++) {
 
-        IdeaVersion saved = versionRepository.save(version);
-        log.info("Created version {} for idea {}", nextVersionNumber, ideaId);
+            int nextVersionNumber = versionRepository.findMaxVersionNumber(ideaId) + 1;
 
-        return ideaMapper.toVersionResponse(saved);
+            IdeaVersion version = IdeaVersion.builder()
+                    .idea(idea)
+                    .versionNumber(nextVersionNumber)
+                    .description(req.description())
+                    .problem(req.problem())
+                    .targetUsers(req.targetUsers())
+                    .monetization(req.monetization())
+                    .risks(req.risks())
+                    .build();
+
+            try {
+                IdeaVersion saved = versionRepository.save(version);
+                return ideaMapper.toVersionResponse(saved);
+
+            } catch (DataIntegrityViolationException ex) {
+
+                if (attempt == maxRetries) {
+                    throw ex;
+                }
+
+                log.warn("Version conflict for idea {} attempt {}/{}",
+                        ideaId, attempt, maxRetries);
+            }
+        }
+
+        throw new IllegalStateException("Failed to create version after retries");
     }
-
-    // ── READ ──────────────────────────────────────────────────────────────────
 
     @Transactional(readOnly = true)
     public List<IdeaVersionResponse> findAll(UUID ideaId, UUID userId) {
         ideaService.getAndAssertOwner(ideaId, userId);
         return versionRepository.findAllByIdeaIdOrderByVersionNumberAsc(ideaId)
                 .stream()
-                .map(ideaMapper::toVersionResponse)
                 .toList();
     }
 
@@ -76,16 +91,23 @@ public class IdeaVersionService {
      * Returns 202 Accepted immediately.
      * AI runs in background thread pool.
      */
-    @Transactional
     public void triggerEvaluation(UUID ideaId, UUID versionId, UUID userId) {
-        ideaService.getAndAssertOwner(ideaId, userId);
-        getVersion(ideaId, versionId); // assert version belongs to idea
 
-        // Idempotency guard — throws 409 if already COMPLETED or PENDING (non-stale)
+        ideaService.getAndAssertOwner(ideaId, userId);
+        getVersion(ideaId, versionId);
+
         aiEvaluationService.markAsInProgress(versionId);
 
-        // Fire and forget — does NOT block HTTP response
-        aiEvaluationService.evaluateAsync(versionId);
+        TransactionSynchronizationManager.registerSynchronization(
+                new TransactionSynchronization() {
+
+                    @Override
+                    public void afterCommit() {
+                        aiEvaluationService.evaluateAsync(versionId);
+                    }
+                });
+        ;
+        ;
     }
 
     @Transactional(readOnly = true)
@@ -105,8 +127,6 @@ public class IdeaVersionService {
 
         return new EvaluationStatusResponse(versionId, status, scores);
     }
-
-    // ── INTERNAL ──────────────────────────────────────────────────────────────
 
     private IdeaVersion getVersion(UUID ideaId, UUID versionId) {
         return versionRepository.findByIdeaIdAndVersionId(ideaId, versionId)

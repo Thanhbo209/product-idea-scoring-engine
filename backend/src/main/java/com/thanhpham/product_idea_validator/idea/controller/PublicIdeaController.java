@@ -9,6 +9,7 @@ import com.thanhpham.product_idea_validator.model.IdeaVersion;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,11 +24,12 @@ public class PublicIdeaController {
 
     // GET /api/v1/public/{shareToken} — no auth required
     @GetMapping("/{shareToken}")
+    @Transactional(readOnly = true)
     public ResponseEntity<PublicIdeaResponse> getByShareToken(
             @PathVariable String shareToken) {
 
         Idea idea = ideaRepository.findByShareToken(shareToken)
-                .orElseThrow(() -> new IdeaNotFoundException(null));
+                .orElseThrow(IdeaNotFoundException::new);
 
         if (!idea.getIsPublic()) {
             // Token exists but sharing was revoked — treat as not found

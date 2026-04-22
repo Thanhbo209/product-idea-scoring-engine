@@ -2,9 +2,11 @@ package com.thanhpham.product_idea_validator.idea.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -48,5 +50,24 @@ public class GlobalExceptionHandler {
         ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation failed");
         pd.setProperty("errors", errors);
         return pd;
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ProblemDetail> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+
+        ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+        problem.setTitle("Bad Request");
+
+        String name = ex.getName();
+        Object value = ex.getValue();
+
+        problem.setDetail("Invalid value for parameter '" + name + "': " + value);
+
+        problem.setProperty("errors", Map.of(
+                name, "Invalid value: " + value));
+
+        problem.setProperty("instance", "/api/v1/ideas");
+
+        return ResponseEntity.badRequest().body(problem);
     }
 }

@@ -1,5 +1,6 @@
 package com.thanhpham.product_idea_validator.idea.repository;
 
+import com.thanhpham.product_idea_validator.idea.DTO.response.IdeaVersionResponse;
 import com.thanhpham.product_idea_validator.model.IdeaVersion;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -7,13 +8,19 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 public interface IdeaVersionRepository extends JpaRepository<IdeaVersion, UUID> {
 
-    List<IdeaVersion> findAllByIdeaIdOrderByVersionNumberAsc(UUID ideaId);
+    @Query("""
+                SELECT v FROM IdeaVersion v
+                WHERE v.idea.id = :ideaId
+                ORDER BY v.versionNumber DESC
+            """)
+    List<IdeaVersion> findTopByIdeaIdOrderByVersionNumberDesc(@Param("ideaId") UUID ideaId);
 
     @Query("SELECT COALESCE(MAX(v.versionNumber), 0) FROM IdeaVersion v WHERE v.idea.id = :ideaId")
     int findMaxVersionNumber(@Param("ideaId") UUID ideaId);
@@ -44,4 +51,16 @@ public interface IdeaVersionRepository extends JpaRepository<IdeaVersion, UUID> 
             @Param("risk") BigDecimal risk,
             @Param("total") BigDecimal total,
             @Param("feedback") String feedback);
+
+    Collection<IdeaVersionResponse> findAllByIdeaIdOrderByVersionNumberAsc(UUID ideaId);
+
+    @Modifying
+    @Query("""
+                UPDATE IdeaVersion v
+                SET v.aiFeedback = '__FAILED__'
+                WHERE v.id = :id AND v.totalScore IS NULL
+            """)
+    int markFailedIfNotEvaluated(@Param("id") UUID id);
+
+    boolean existsByIdeaIdAndAiFeedbackStartingWith(UUID ideaId, String prefix);
 }
