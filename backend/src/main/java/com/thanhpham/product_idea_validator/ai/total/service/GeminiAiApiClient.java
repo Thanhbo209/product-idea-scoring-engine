@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class GeminiAiApiClient extends AiApiClient {
+public class GeminiAiApiClient implements AiApiClient {
 
         private final GeminiClient geminiClient;
         private final IdeaPromptBuilder promptBuilder;

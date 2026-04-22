@@ -73,11 +73,3 @@ public class JwtService {
         return extractClaim(token, Claims::getExpiration).before(new Date());
     }
 }
-
-// Đổi subject từ email sang userId vì email có thể thay đổi, nhưng userId thì
-// không. Điều này giúp token ổn định hơn khi người dùng cập nhật thông tin cá
-// nhân.
-// Thêm role vào token để dễ dàng kiểm tra quyền truy cập mà không cần phải truy
-// vấn cơ sở dữ liệu mỗi lần xác thực token.
-// Sử dụng Claims để lưu trữ thông tin tùy chỉnh (userId, email, role) trong
-// token, giúp việc trích xuất thông tin này dễ dàng hơn khi xác thực token.

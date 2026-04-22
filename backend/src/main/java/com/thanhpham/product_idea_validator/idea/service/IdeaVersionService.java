@@ -86,11 +86,8 @@ public class IdeaVersionService {
     }
 
     // ── AI EVALUATION ─────────────────────────────────────────────────────────
+    @Transactional
 
-    /**
-     * Returns 202 Accepted immediately.
-     * AI runs in background thread pool.
-     */
     public void triggerEvaluation(UUID ideaId, UUID versionId, UUID userId) {
 
         ideaService.getAndAssertOwner(ideaId, userId);

@@ -36,19 +36,31 @@ public class GeminiResponseParser {
         if (text == null || text.isBlank()) {
             throw new RuntimeException("Empty response from Gemini");
         }
-        // Remove ```json ... ``` or ``` ... ```
+
         String cleaned = text
                 .replaceAll("(?s)```json\\s*", "")
                 .replaceAll("(?s)```\\s*", "")
                 .trim();
 
-        // Find first { and last }
-        int start = cleaned.indexOf('{');
-        int end = cleaned.lastIndexOf('}');
-        if (start == -1 || end == -1 || start >= end) {
-            throw new RuntimeException("No valid JSON object found in response: " + cleaned);
+        int braceCount = 0;
+        int start = -1;
+
+        for (int i = 0; i < cleaned.length(); i++) {
+            char c = cleaned.charAt(i);
+
+            if (c == '{') {
+                if (braceCount == 0)
+                    start = i;
+                braceCount++;
+            } else if (c == '}') {
+                braceCount--;
+                if (braceCount == 0 && start != -1) {
+                    return cleaned.substring(start, i + 1);
+                }
+            }
         }
-        return cleaned.substring(start, end + 1);
+
+        throw new RuntimeException("No valid JSON object found in response: " + cleaned);
     }
 
     private ParsedEvaluationResult validate(RawGeminiResult raw) {

@@ -59,11 +59,16 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginRequest request) {
-        // Sử dụng AuthenticationManager để xác thực email và password
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()));
+        Authentication authentication;
+        try {
+            authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getEmail(),
+                            request.getPassword()));
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
 
         // Nếu xác thực thành công, Spring Security sẽ trả về một đối tượng
         // Authentication chứa thông tin người dùng

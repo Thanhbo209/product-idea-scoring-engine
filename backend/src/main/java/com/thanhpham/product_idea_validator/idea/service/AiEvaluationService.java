@@ -7,6 +7,8 @@ import com.thanhpham.product_idea_validator.idea.repository.IdeaVersionRepositor
 import com.thanhpham.product_idea_validator.model.IdeaVersion;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.lang.NonNull;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,12 +27,8 @@ public class AiEvaluationService {
     private final AiApiClient aiApiClient;
     private final IdeaMapper ideaMapper;
 
-    /**
-     * Step 1 — called synchronously before returning 202.
-     * Guards against duplicate triggers.
-     */
     @Transactional
-    public void markAsInProgress(UUID versionId) {
+    public void markAsInProgress(@NonNull UUID versionId) {
         IdeaVersion version = versionRepository.findById(versionId)
                 .orElseThrow(() -> new IdeaVersionNotFoundException(versionId));
 
@@ -62,7 +60,7 @@ public class AiEvaluationService {
      */
     @Async("aiEvaluationExecutor")
     @Transactional
-    public CompletableFuture<Void> evaluateAsync(UUID versionId) {
+    public CompletableFuture<Void> evaluateAsync(@NonNull UUID versionId) {
         IdeaVersion version = versionRepository.findById(versionId)
                 .orElseGet(() -> {
                     log.error("Version {} not found during async evaluation", versionId);
@@ -102,7 +100,6 @@ public class AiEvaluationService {
 
             versionRepository.markFailedIfNotEvaluated(versionId);
         }
-
         return CompletableFuture.completedFuture(null);
     }
 
