@@ -57,4 +57,5 @@ public class Idea extends BaseEntity {
     public enum Status {
         DRAFT, ACTIVE, ARCHIVED
     }
+
 }

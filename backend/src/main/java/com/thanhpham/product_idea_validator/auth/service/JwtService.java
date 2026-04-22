@@ -25,14 +25,11 @@ public class JwtService {
 
     public String generateToken(UUID userId, String email, String role) {
         return Jwts.builder()
-                .claims(Map.of(
-                        "userId", userId.toString(),
-                        "email", email,
-                        "role", role))
+                .subject(email) // sử dụng email làm subject để dễ dàng trích xuất thông tin người dùng
+                .claims(Map.of("role", role))
                 .issuedAt(new Date()) // thời điểm token được tạo
                 .expiration(new Date(System.currentTimeMillis() + jwtExpirationMs)) // thời điểm token hết hạn
                 .signWith(getSigningKey()) // ký token bằng khóa bí mật
-                .subject(userId.toString())
                 .compact(); // tạo token dưới dạng chuỗi compact (header.payload.signature)
     }
 
@@ -51,14 +48,9 @@ public class JwtService {
         return claimsResolver.apply(claims);
     }
 
-    // userId từ token
-    public String extractUserId(String token) {
-        return extractClaim(token, Claims::getSubject);
-    }
-
-    // email từ token
+    // EMAIL identity
     public String extractEmail(String token) {
-        return extractClaim(token, claims -> claims.get("email", String.class));
+        return extractClaim(token, Claims::getSubject);
     }
 
     // role từ token
@@ -68,7 +60,7 @@ public class JwtService {
 
     // Kiểm tra tính hợp lệ của token
     public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String email = extractEmail(token);
+        String email = extractEmail(token);
         return email.equals(userDetails.getUsername()) && !isTokenExpired(token);
     }
 
