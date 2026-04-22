@@ -25,15 +25,12 @@ public class JwtService {
 
     public String generateToken(UUID userId, String email, String role) {
         return Jwts.builder()
-                .claims(Map.of(
-                        "userId", userId.toString(),
-                        "email", email,
-                        "role", role))
-                .issuedAt(new Date()) // thời điểm token được tạo
-                .expiration(new Date(System.currentTimeMillis() + jwtExpirationMs)) // thời điểm token hết hạn
-                .signWith(getSigningKey()) // ký token bằng khóa bí mật
-                .subject(userId.toString())
-                .compact(); // tạo token dưới dạng chuỗi compact (header.payload.signature)
+                .subject(email)
+                .claims(Map.of("userId", userId.toString(), "role", role))
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
+                .signWith(getSigningKey())
+                .compact();
     }
 
     // Lấy khóa ký từ chuỗi bí mật
@@ -51,14 +48,9 @@ public class JwtService {
         return claimsResolver.apply(claims);
     }
 
-    // userId từ token
-    public String extractUserId(String token) {
-        return extractClaim(token, Claims::getSubject);
-    }
-
-    // email từ token
+    // EMAIL identity
     public String extractEmail(String token) {
-        return extractClaim(token, claims -> claims.get("email", String.class));
+        return extractClaim(token, Claims::getSubject);
     }
 
     // role từ token
@@ -66,9 +58,13 @@ public class JwtService {
         return extractClaim(token, claims -> claims.get("role", String.class));
     }
 
+    public UUID extractUserId(String token) {
+        return UUID.fromString(extractClaim(token, c -> c.get("userId", String.class)));
+    }
+
     // Kiểm tra tính hợp lệ của token
     public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String email = extractEmail(token);
+        String email = extractEmail(token);
         return email.equals(userDetails.getUsername()) && !isTokenExpired(token);
     }
 

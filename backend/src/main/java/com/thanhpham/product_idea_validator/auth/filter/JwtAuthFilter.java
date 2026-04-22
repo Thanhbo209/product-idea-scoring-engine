@@ -1,7 +1,9 @@
 package com.thanhpham.product_idea_validator.auth.filter;
 
+import com.thanhpham.product_idea_validator.auth.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -12,12 +14,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.springframework.security.core.AuthenticationException;
-import com.thanhpham.product_idea_validator.auth.service.JwtService;
-
-import io.jsonwebtoken.JwtException;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 @Component
 @RequiredArgsConstructor
@@ -32,45 +31,49 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
 
-        String jwt = null;
-        String email = null;
-
-        if (request.getCookies() != null) {
-            for (var cookie : request.getCookies()) {
-                if ("auth-token".equals(cookie.getName())) {
-                    jwt = cookie.getValue();
-                    break;
-                }
-            }
-        }
+        String jwt = extractTokenFromCookie(request);
 
         if (jwt == null) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-        try {
-            email = jwtService.extractEmail(jwt);
-        } catch (Exception e) {
-            System.out.println("JWT extract failed: " + e.getMessage());
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            try {
-                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-
-                if (jwtService.isTokenValid(jwt, userDetails)) {
-                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                            userDetails, null, userDetails.getAuthorities());
-                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
-                }
-            } catch (AuthenticationException | JwtException e) {
-                SecurityContextHolder.clearContext();
+            String header = request.getHeader("Authorization");
+            if (header != null && header.startsWith("Bearer ")) {
+                jwt = header.substring(7);
             }
+        }
+
+        if (jwt == null || SecurityContextHolder.getContext().getAuthentication() != null) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        try {
+            String email = jwtService.extractEmail(jwt);
+
+            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+            if (jwtService.isTokenValid(jwt, userDetails)) {
+
+                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                        userDetails,
+                        null,
+                        userDetails.getAuthorities());
+
+                auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(auth);
+            }
+
+        } catch (io.jsonwebtoken.JwtException | org.springframework.security.core.AuthenticationException e) {
+            logger.warn("JWT validation failed: {}", e);
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private String extractTokenFromCookie(HttpServletRequest request) {
+        if (request.getCookies() == null)
+            return null;
+        return Arrays.stream(request.getCookies())
+                .filter(c -> "auth-token".equals(c.getName()))
+                .map(Cookie::getValue)
+                .findFirst()
+                .orElse(null);
     }
 }
