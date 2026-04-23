@@ -25,7 +25,7 @@ export const LoginForm = () => {
 
     try {
       const res = await authApi.login(form);
-      setAuth(res.accessToken, {
+      setAuth({
         userId: res.userId,
         email: res.email,
         fullName: res.fullName,
@@ -40,7 +40,7 @@ export const LoginForm = () => {
   };
 
   return (
-    <div className=" border border-border rounded-xl p-8">
+    <div className="border border-border rounded-xl p-8">
       <form onSubmit={handleSubmit} className="space-y-5">
         {error && (
           <p className="text-sm text-destructive bg-card border border-border px-3 py-2">
