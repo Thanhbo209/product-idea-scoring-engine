@@ -56,7 +56,7 @@ public class GeminiResponseParser {
         int last = cleaned.lastIndexOf('}');
 
         if (first == -1 || last == -1 || last <= first) {
-            throw new RuntimeException("No JSON found: " + cleaned);
+            throw new RuntimeException("No JSON object found in AI response");
         }
 
         return cleaned.substring(first, last + 1);
