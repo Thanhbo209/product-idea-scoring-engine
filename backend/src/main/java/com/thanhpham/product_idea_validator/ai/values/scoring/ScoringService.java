@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -39,16 +40,26 @@ public class ScoringService {
      * Validates parsed result and computes authoritative total.
      * Returns a ScoringResult ready to persist into IdeaVersion.
      */
+    private BigDecimal defaultScore(BigDecimal score) {
+        return score != null ? score : BigDecimal.ZERO;
+    }
+
     public ScoringResult process(ParsedEvaluationResult parsed) {
+
+        Objects.requireNonNull(parsed, "parsed");
+
+        BigDecimal clarityScore = defaultScore(parsed.clarityScore());
+        BigDecimal marketScore = defaultScore(parsed.marketScore());
+        BigDecimal riskScore = defaultScore(parsed.riskScore());
         BigDecimal total = computeTotal(
-                parsed.clarityScore(),
-                parsed.marketScore(),
-                parsed.riskScore());
+                clarityScore,
+                marketScore,
+                riskScore);
 
         return new ScoringResult(
-                parsed.clarityScore(),
-                parsed.marketScore(),
-                parsed.riskScore(),
+                clarityScore,
+                marketScore,
+                riskScore,
                 total,
                 buildFeedback(parsed));
     }

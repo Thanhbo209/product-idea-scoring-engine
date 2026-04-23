@@ -17,6 +17,7 @@ public class GeminiFallbackService {
           "risk_score": 0.0,
           "total_score": 0.0,
           "feedback": "AI service is temporarily unavailable. Using fallback response."
+          "source": "FALLBACK"
         }
         """;
   }
