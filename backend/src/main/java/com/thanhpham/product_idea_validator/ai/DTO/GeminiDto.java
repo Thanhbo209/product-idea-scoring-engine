@@ -2,6 +2,7 @@ package com.thanhpham.product_idea_validator.ai.DTO;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class GeminiDto {
 
@@ -36,7 +37,8 @@ public class GeminiDto {
                 return "";
             return c.content().parts().stream()
                     .map(Part::text)
-                    .reduce("", String::concat)
+                    .filter(java.util.Objects::nonNull)
+                    .collect(Collectors.joining())
                     .trim();
         }
     }
