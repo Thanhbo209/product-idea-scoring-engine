@@ -44,4 +44,5 @@ public class GeminiDto {
     @JsonIgnoreProperties(ignoreUnknown = true)
     public record Candidate(Content content, String finishReason) {
     }
+
 }

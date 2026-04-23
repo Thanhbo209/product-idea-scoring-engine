@@ -17,50 +17,49 @@ public class GeminiResponseParser {
 
     private final ObjectMapper objectMapper;
 
+    private ParsedEvaluationResult safeFallback() {
+        return new ParsedEvaluationResult(
+                "UNKNOWN",
+                "UNKNOWN",
+                "UNKNOWN",
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                "AI unavailable - fallback result");
+    }
+
     public ParsedEvaluationResult parse(String rawText) {
-        String json = extractJson(rawText);
         try {
+            String json = extractJson(rawText);
             RawGeminiResult raw = objectMapper.readValue(json, RawGeminiResult.class);
             return validate(raw);
+
         } catch (Exception ex) {
-            log.error("Failed to parse Gemini response: {}\nRaw: {}", ex.getMessage(), rawText);
-            throw new RuntimeException("Failed to parse AI response: " + ex.getMessage(), ex);
+            log.error("AI parse failed → using safe fallback", ex);
+
+            return safeFallback();
         }
     }
 
-    /**
-     * Strips markdown code fences if Gemini ignores the "no markdown" instruction.
-     * e.g. ```json { ... } ``` → { ... }
-     */
     private String extractJson(String text) {
         if (text == null || text.isBlank()) {
-            throw new RuntimeException("Empty response from Gemini");
+            throw new RuntimeException("Empty response");
         }
 
         String cleaned = text
-                .replaceAll("(?s)```json\\s*", "")
-                .replaceAll("(?s)```\\s*", "")
+                .replaceAll("```json", "")
+                .replaceAll("```", "")
                 .trim();
 
-        int braceCount = 0;
-        int start = -1;
+        int first = cleaned.indexOf('{');
+        int last = cleaned.lastIndexOf('}');
 
-        for (int i = 0; i < cleaned.length(); i++) {
-            char c = cleaned.charAt(i);
-
-            if (c == '{') {
-                if (braceCount == 0)
-                    start = i;
-                braceCount++;
-            } else if (c == '}') {
-                braceCount--;
-                if (braceCount == 0 && start != -1) {
-                    return cleaned.substring(start, i + 1);
-                }
-            }
+        if (first == -1 || last == -1 || last <= first) {
+            throw new RuntimeException("No JSON found: " + cleaned);
         }
 
-        throw new RuntimeException("No valid JSON object found in response: " + cleaned);
+        return cleaned.substring(first, last + 1);
     }
 
     private ParsedEvaluationResult validate(RawGeminiResult raw) {
