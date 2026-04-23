@@ -5,16 +5,19 @@ import org.springframework.stereotype.Component;
 @Component
 public class GeminiFallbackService {
 
-    public String generate(String prompt) {
+  public String generate(String prompt) {
 
-        return """
-                {
-                  "score": 0.0,
-                  "confidence": 0.0,
-                  "feedback": "AI service is temporarily unavailable. Using fallback response.",
-                  "riskLevel": "UNKNOWN",
-                  "source": "FALLBACK"
-                }
-                """;
-    }
+    return """
+        {
+          "extracted_target_users": "UNKNOWN",
+          "extracted_problem": "UNKNOWN",
+          "extracted_risks": "UNKNOWN",
+          "clarity_score": 0.0,
+          "market_score": 0.0,
+          "risk_score": 0.0,
+          "total_score": 0.0,
+          "feedback": "AI service is temporarily unavailable. Using fallback response."
+        }
+        """;
+  }
 }

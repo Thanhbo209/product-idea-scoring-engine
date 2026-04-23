@@ -119,6 +119,7 @@ public class GeminiClient {
             Thread.sleep(ms);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+            throw new IllegalStateException("Interrupted while waiting to retry Gemini request", e);
         }
     }
 }
