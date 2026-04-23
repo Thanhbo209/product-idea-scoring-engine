@@ -21,72 +21,73 @@ import jakarta.validation.Valid;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final AuthService authService;
+        private final AuthService authService;
 
-    @GetMapping("/me")
-    public ResponseEntity<AuthResponse> getMe(Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return ResponseEntity.status(401).build();
+        @GetMapping("/me")
+        public ResponseEntity<AuthResponse> getMe(Authentication authentication) {
+                if (authentication == null || !authentication.isAuthenticated()) {
+                        return ResponseEntity.status(401).build();
+                }
+
+                UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+                AuthResponse response = authService.getUserInfo(userDetails.getUsername());
+
+                return ResponseEntity.ok(response);
         }
 
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        @PostMapping("/register")
+        public ResponseEntity<AuthResponse> register(
+                        @Valid @RequestBody RegisterRequest request) {
 
-        AuthResponse response = authService.getUserInfo(userDetails.getUsername());
+                AuthResponse response = authService.register(request);
 
-        return ResponseEntity.ok(response);
-    }
+                String token = response.getAccessToken();
+                ResponseCookie cookie = ResponseCookie.from("auth-token", token)
+                                .httpOnly(true)
+                                .secure(false)
+                                .path("/")
+                                .sameSite("Lax")
+                                .maxAge(60 * 60 * 24)
+                                .build();
 
-    @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(
-            @Valid @RequestBody RegisterRequest request) {
+                response.setAccessToken(null); // xoá sau khi lấy token
 
-        AuthResponse response = authService.register(request);
+                return ResponseEntity.status(201)
+                                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                                .body(response);
+        }
 
-        response.setAccessToken(null);
+        @PostMapping("/login")
+        public ResponseEntity<AuthResponse> login(
+                        @Valid @RequestBody LoginRequest request) {
 
-        ResponseCookie cookie = ResponseCookie.from("auth-token", response.getAccessToken())
-                .httpOnly(true)
-                .secure(false)
-                .path("/")
-                .sameSite("Lax")
-                .maxAge(60 * 60 * 24)
-                .build();
+                AuthResponse response = authService.login(request);
 
-        return ResponseEntity.status(201)
-                .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .body(response);
-    }
+                ResponseCookie cookie = ResponseCookie.from("auth-token", response.getAccessToken())
+                                .httpOnly(true)
+                                .secure(false) // true nếu deploy HTTPS
+                                .path("/")
+                                .sameSite("Lax")
+                                .maxAge(60 * 60 * 24)
+                                .build();
 
-    @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(
-            @Valid @RequestBody LoginRequest request) {
+                return ResponseEntity.ok()
+                                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                                .body(response);
+        }
 
-        AuthResponse response = authService.login(request);
+        @PostMapping("/logout")
+        public ResponseEntity<?> logout() {
+                ResponseCookie cookie = ResponseCookie.from("auth-token", "")
+                                .httpOnly(true)
+                                .secure(false) // true nếu production
+                                .path("/")
+                                .maxAge(0)
+                                .build();
 
-        ResponseCookie cookie = ResponseCookie.from("auth-token", response.getAccessToken())
-                .httpOnly(true)
-                .secure(false) // true nếu deploy HTTPS
-                .path("/")
-                .sameSite("Lax")
-                .maxAge(60 * 60 * 24)
-                .build();
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .body(response);
-    }
-
-    @PostMapping("/logout")
-    public ResponseEntity<?> logout() {
-        ResponseCookie cookie = ResponseCookie.from("auth-token", "")
-                .httpOnly(true)
-                .secure(false)
-                .path("/")
-                .maxAge(0)
-                .build();
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .build();
-    }
+                return ResponseEntity.ok()
+                                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                                .build();
+        }
 }

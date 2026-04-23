@@ -40,7 +40,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             }
         }
 
-        if (jwt == null || SecurityContextHolder.getContext().getAuthentication() != null) {
+        if (jwt == null || jwt.isBlank() ||
+                SecurityContextHolder.getContext().getAuthentication() != null) {
             filterChain.doFilter(request, response);
             return;
         }

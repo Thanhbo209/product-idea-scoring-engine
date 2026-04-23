@@ -10,6 +10,7 @@ public class ProductIdeaValidatorApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(ProductIdeaValidatorApplication.class, args);
+
 	}
 
 }

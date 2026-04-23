@@ -12,7 +12,7 @@ public class CustomUserPrincipal implements UserDetails {
     private final String email;
     private final String password;
     private final Collection<? extends GrantedAuthority> authorities;
-    private final boolean enabled;
+    private final boolean isVerified;
 
     public CustomUserPrincipal(
             UUID userId,
@@ -24,7 +24,8 @@ public class CustomUserPrincipal implements UserDetails {
         this.email = email;
         this.password = password;
         this.authorities = authorities;
-        this.enabled = enabled;
+        this.isVerified = enabled;
+
     }
 
     // internal use only
@@ -62,8 +63,7 @@ public class CustomUserPrincipal implements UserDetails {
         return true;
     }
 
-    @Override
-    public boolean isEnabled() {
-        return enabled;
+    public boolean isVerified() {
+        return isVerified;
     }
 }
