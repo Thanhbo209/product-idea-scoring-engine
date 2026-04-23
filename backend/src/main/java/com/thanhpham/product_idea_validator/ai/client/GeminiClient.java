@@ -3,7 +3,6 @@ package com.thanhpham.product_idea_validator.ai.client;
 import com.thanhpham.product_idea_validator.ai.DTO.GeminiDto;
 import com.thanhpham.product_idea_validator.ai.config.GeminiProperties;
 import com.thanhpham.product_idea_validator.ai.service.GeminiFallbackService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -14,7 +13,6 @@ import java.time.Duration;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class GeminiClient {
 
     private static final int MAX_RETRY = 4;
@@ -26,15 +24,27 @@ public class GeminiClient {
     private final GeminiFallbackService fallbackService;
     private final GeminiRateLimiter rateLimiter;
 
+    public GeminiClient(
+            @Qualifier("geminiWebClient") WebClient webClient,
+            GeminiProperties props,
+            GeminiFallbackService fallbackService,
+            GeminiRateLimiter rateLimiter) {
+        this.webClient = webClient;
+        this.props = props;
+        this.fallbackService = fallbackService;
+        this.rateLimiter = rateLimiter;
+    }
+
     public String generate(String prompt) {
 
-        // 1. RATE LIMIT (chặn từ đầu)
-        rateLimiter.acquireOrWait();
+        // RATE LIMIT
 
         int attempt = 0;
 
         while (attempt < MAX_RETRY) {
             try {
+                // Rate-limit every outbound Gemini call, including retries.
+                rateLimiter.acquireOrWait();
                 return callGemini(prompt);
 
             } catch (WebClientResponseException ex) {
@@ -44,6 +54,10 @@ public class GeminiClient {
                 // retryable errors
                 if (status == 429 || status == 503) {
                     attempt++;
+
+                    if (attempt >= MAX_RETRY) {
+                        break;
+                    }
 
                     long backoff = calculateBackoff(attempt);
 
