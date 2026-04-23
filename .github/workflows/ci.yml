@@ -22,6 +22,29 @@ jobs:
       run:
         working-directory: backend
 
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: idea_validator_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+          --health-start-period 10s
+
+    env:
+      DATABASE_URL: jdbc:postgresql://localhost:5432/idea_validator_test
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      GEMINI_API_KEY: ci-placeholder
+      SPRING_PROFILES_ACTIVE: test
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -32,6 +55,17 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: temurin
           cache: maven
+
+     - name: Wait for PostgreSQL
+        run: |
+          for i in $(seq 1 30); do
+            if pg_isready -h localhost -p 5432 -U postgres; then
+              echo "PostgreSQL is ready!"
+              break
+            fi
+            echo "Waiting for PostgreSQL..."
+            sleep 2
+          done
 
       - name: Build & Test
         run: mvn clean install --batch-mode --no-transfer-progress
