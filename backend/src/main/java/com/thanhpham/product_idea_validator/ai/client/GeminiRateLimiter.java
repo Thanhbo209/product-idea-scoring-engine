@@ -23,14 +23,15 @@ public class GeminiRateLimiter {
                 .build();
     }
 
-    public void acquireOrWait() {
+    public boolean acquireOrWait() {
         while (!bucket.tryConsume(1)) {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                return;
+                return false;
             }
         }
+        return true;
     }
 }
