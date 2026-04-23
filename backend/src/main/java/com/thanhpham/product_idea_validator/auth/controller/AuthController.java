@@ -42,8 +42,6 @@ public class AuthController {
 
                 AuthResponse response = authService.register(request);
 
-                response.setAccessToken(null);
-
                 String token = response.getAccessToken();
                 ResponseCookie cookie = ResponseCookie.from("auth-token", token)
                                 .httpOnly(true)
