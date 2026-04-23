@@ -1,0 +1,11 @@
+# backend/src/test/resources/application-test.yml
+spring:
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/idea_validator_test}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+  flyway:
+    enabled: false # tắt Flyway trong test — dùng ddl-auto thay thế
