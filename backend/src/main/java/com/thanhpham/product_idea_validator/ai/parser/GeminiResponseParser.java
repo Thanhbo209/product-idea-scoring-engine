@@ -62,16 +62,20 @@ public class GeminiResponseParser {
         return cleaned.substring(first, last + 1);
     }
 
+    private String defaultText(String value, String fallback) {
+        return value == null || value.isBlank() ? fallback : value;
+    }
+
     private ParsedEvaluationResult validate(RawGeminiResult raw) {
         return new ParsedEvaluationResult(
-                raw.extractedTargetUsers(),
-                raw.extractedProblem(),
-                raw.extractedRisks(),
+                defaultText(raw.extractedTargetUsers(), "UNKNOWN"),
+                defaultText(raw.extractedProblem(), "UNKNOWN"),
+                defaultText(raw.extractedRisks(), "UNKNOWN"),
                 clamp(raw.clarityScore()),
                 clamp(raw.marketScore()),
                 clamp(raw.riskScore()),
                 clamp(raw.totalScore()),
-                raw.feedback());
+                defaultText(raw.feedback(), "AI unavailable - fallback result"));
     }
 
     private BigDecimal clamp(Double value) {
