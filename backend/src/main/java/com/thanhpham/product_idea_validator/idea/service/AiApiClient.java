@@ -2,10 +2,6 @@ package com.thanhpham.product_idea_validator.idea.service;
 
 import java.math.BigDecimal;
 
-import org.springframework.stereotype.Service;
-
-@Service
-
 public interface AiApiClient {
         AiResult evaluate(
                         String description,
