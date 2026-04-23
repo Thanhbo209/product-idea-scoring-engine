@@ -1,5 +1,8 @@
 spring:
   datasource:
+    hikari:
+      initialization-fail-timeout: 0
+      connection-timeout: 20000
     url: ${DATABASE_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
