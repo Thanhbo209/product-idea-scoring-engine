@@ -1,10 +1,10 @@
 "use client";
 
 import SidebarShell from "@/components/SidebarShell";
+import { authApi } from "@/lib/api/authApi";
 import { useAuthStore } from "@/store/authStore";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { authApi } from "@/lib/api/authApi";
 
 export default function DashboardLayout({
   children,
