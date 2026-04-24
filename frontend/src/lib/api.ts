@@ -29,6 +29,9 @@ async function request<T>(
     throw new Error(error.message ?? "Request failed");
   }
 
+  // 204 No Content — return undefined cast to T
+  if (res.status === 204) return undefined as T;
+
   return res.json();
 }
 
@@ -40,6 +43,9 @@ export const api = {
 
   put: <T>(endpoint: string, body: unknown) =>
     request<T>(endpoint, { method: "PUT", body }),
+
+  patch: <T>(endpoint: string, body: unknown) =>
+    request<T>(endpoint, { method: "PATCH", body }),
 
   delete: <T>(endpoint: string) => request<T>(endpoint, { method: "DELETE" }),
 };

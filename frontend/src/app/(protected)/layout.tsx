@@ -1,7 +1,7 @@
 "use client";
 
 import SidebarShell from "@/components/SidebarShell";
-import { authApi } from "@/lib/api/authApi";
+import { authApi } from "@/lib/authApi";
 import { useAuthStore } from "@/store/authStore";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";

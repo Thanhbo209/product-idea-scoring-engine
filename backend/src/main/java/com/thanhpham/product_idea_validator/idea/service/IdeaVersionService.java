@@ -75,6 +75,7 @@ public class IdeaVersionService {
         ideaService.getAndAssertOwner(ideaId, userId);
         return versionRepository.findAllByIdeaIdOrderByVersionNumberAsc(ideaId)
                 .stream()
+                .map(ideaMapper::toVersionResponse)
                 .toList();
     }
 
@@ -87,7 +88,6 @@ public class IdeaVersionService {
 
     // ── AI EVALUATION ─────────────────────────────────────────────────────────
     @Transactional
-
     public void triggerEvaluation(UUID ideaId, UUID versionId, UUID userId) {
 
         ideaService.getAndAssertOwner(ideaId, userId);

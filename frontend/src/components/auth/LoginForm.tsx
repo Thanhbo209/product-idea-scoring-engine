@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
 import { useState } from "react";
-import { authApi } from "@/lib/api/authApi";
+import { authApi } from "@/lib/authApi";
 
 export const LoginForm = () => {
   const router = useRouter();
