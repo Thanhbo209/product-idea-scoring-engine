@@ -4,7 +4,7 @@ import SidebarShell from "@/components/SidebarShell";
 import { useAuthStore } from "@/store/authStore";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { authApi } from "@/lib/authApi";
+import { authApi } from "@/lib/api/authApi";
 
 export default function DashboardLayout({
   children,
@@ -18,7 +18,7 @@ export default function DashboardLayout({
   useEffect(() => {
     const fetchMe = async () => {
       try {
-        const me = await authApi.me(); // 🔥 server source of truth
+        const me = await authApi.me();
         setAuth(me);
       } catch {
         clearAuth();

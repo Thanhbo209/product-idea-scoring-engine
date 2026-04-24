@@ -19,7 +19,7 @@ import {
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { authApi } from "@/lib/authApi";
+import { authApi } from "@/lib/api/authApi";
 
 const NAV_ITEMS = [
   {
