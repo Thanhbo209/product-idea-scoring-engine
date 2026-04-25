@@ -44,7 +44,8 @@ jobs:
       SPRING_DATASOURCE_PASSWORD: postgres
       GEMINI_API_KEY: ci-placeholder
       SPRING_PROFILES_ACTIVE: test
-      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      SPRING_JPA_HIBERNATE_DDL_AUTO: none
+      SPRING_FLYWAY_ENABLED: true
 
     steps:
       - name: Checkout
