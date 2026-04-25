@@ -32,6 +32,7 @@ const EMPTY: CreateVersionRequest = {
 
 export default function CreateVersionForm({ ideaId }: CreateVersionFormProps) {
   const [open, setOpen] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
   const [form, setForm] = useState<CreateVersionRequest>(EMPTY);
 
   const { mutate: createVersion, isPending } = useCreateVersion(ideaId);
@@ -41,10 +42,25 @@ export default function CreateVersionForm({ ideaId }: CreateVersionFormProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    setFormError(null);
+
     createVersion(form, {
       onSuccess: () => {
         setForm(EMPTY);
         setOpen(false);
+      },
+      onError: (err: unknown) => {
+        const error = err as {
+          response?: { data?: { message?: string } };
+          message?: string;
+        };
+
+        setFormError(
+          error.response?.data?.message ||
+            error.message ||
+            "Failed to create version",
+        );
       },
     });
   };
@@ -106,6 +122,11 @@ export default function CreateVersionForm({ ideaId }: CreateVersionFormProps) {
         >
           Cancel
         </button>
+        {formError && (
+          <div className="text-xs text-destructive bg-destructive/10 border border-destructive/20 rounded-lg px-3 py-2">
+            {formError}
+          </div>
+        )}
         <button
           type="submit"
           disabled={isPending}
