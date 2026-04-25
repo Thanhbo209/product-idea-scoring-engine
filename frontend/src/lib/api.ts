@@ -1,4 +1,5 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
+const BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080/api/v1";
 
 type RequestOptions = {
   method?: string;
@@ -23,23 +24,24 @@ async function request<T>(
   });
 
   if (!res.ok) {
-    const error = await res
-      .json()
-      .catch(() => ({ message: "Something went wrong" }));
-    throw new Error(error.message ?? "Request failed");
+    let message = "Request failed";
+    try {
+      const error = await res.json();
+      message = error.message ?? message;
+    } catch {}
+    throw new Error(message);
   }
+
+  if (res.status === 204) return null as T;
 
   return res.json();
 }
 
 export const api = {
+  get: <T>(endpoint: string) => request<T>(endpoint),
   post: <T>(endpoint: string, body: unknown) =>
     request<T>(endpoint, { method: "POST", body }),
-
-  get: <T>(endpoint: string) => request<T>(endpoint, { method: "GET" }),
-
   put: <T>(endpoint: string, body: unknown) =>
     request<T>(endpoint, { method: "PUT", body }),
-
   delete: <T>(endpoint: string) => request<T>(endpoint, { method: "DELETE" }),
 };

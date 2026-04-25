@@ -33,4 +33,10 @@ public interface IdeaRepository extends JpaRepository<Idea, UUID> {
 
     boolean existsByShareToken(String shareToken);
 
+    @Query("""
+                SELECT COUNT(i)
+                FROM Idea i
+                WHERE i.user.id = :userId
+            """)
+    long countByUserId(@Param("userId") UUID userId);
 }

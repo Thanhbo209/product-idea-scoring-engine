@@ -1,10 +1,10 @@
 "use client";
 
 import SidebarShell from "@/components/SidebarShell";
+import { authApi } from "@/lib/authApi";
 import { useAuthStore } from "@/store/authStore";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { authApi } from "@/lib/authApi";
 
 export default function DashboardLayout({
   children,
@@ -18,7 +18,7 @@ export default function DashboardLayout({
   useEffect(() => {
     const fetchMe = async () => {
       try {
-        const me = await authApi.me(); // 🔥 server source of truth
+        const me = await authApi.me();
         setAuth(me);
       } catch {
         clearAuth();
@@ -31,7 +31,11 @@ export default function DashboardLayout({
     fetchMe();
   }, [router, setAuth, clearAuth]);
 
-  if (loading) return null;
+  if (loading) {
+    return (
+      <div className="p-6 text-sm text-muted-foreground">Checking auth...</div>
+    );
+  }
 
   return <SidebarShell authenticated={!!user}>{children}</SidebarShell>;
 }

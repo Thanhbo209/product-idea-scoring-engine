@@ -1,7 +1,8 @@
 package com.thanhpham.product_idea_validator.idea.repository;
 
-import com.thanhpham.product_idea_validator.idea.DTO.response.IdeaVersionResponse;
 import com.thanhpham.product_idea_validator.model.IdeaVersion;
+
+import org.springframework.boot.data.autoconfigure.web.DataWebProperties.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -15,18 +16,10 @@ import java.util.UUID;
 
 public interface IdeaVersionRepository extends JpaRepository<IdeaVersion, UUID> {
 
-    @Query("""
-                SELECT v FROM IdeaVersion v
-                WHERE v.idea.id = :ideaId
-                ORDER BY v.versionNumber DESC
-            """)
-    List<IdeaVersion> findTopByIdeaIdOrderByVersionNumberDesc(@Param("ideaId") UUID ideaId);
-
     @Query("SELECT COALESCE(MAX(v.versionNumber), 0) FROM IdeaVersion v WHERE v.idea.id = :ideaId")
     int findMaxVersionNumber(@Param("ideaId") UUID ideaId);
 
-    @Query("SELECT v FROM IdeaVersion v WHERE v.idea.id = :ideaId ORDER BY v.versionNumber DESC LIMIT 1")
-    Optional<IdeaVersion> findLatestByIdeaId(@Param("ideaId") UUID ideaId);
+    Optional<IdeaVersion> findTopByIdeaIdOrderByVersionNumberDesc(UUID ideaId);
 
     @Query("SELECT v FROM IdeaVersion v WHERE v.idea.id = :ideaId AND v.id = :versionId")
     Optional<IdeaVersion> findByIdeaIdAndVersionId(
@@ -52,7 +45,7 @@ public interface IdeaVersionRepository extends JpaRepository<IdeaVersion, UUID> 
             @Param("total") BigDecimal total,
             @Param("feedback") String feedback);
 
-    Collection<IdeaVersionResponse> findAllByIdeaIdOrderByVersionNumberAsc(UUID ideaId);
+    Collection<IdeaVersion> findAllByIdeaIdOrderByVersionNumberAsc(UUID ideaId);
 
     @Modifying
     @Query("""
@@ -63,4 +56,37 @@ public interface IdeaVersionRepository extends JpaRepository<IdeaVersion, UUID> 
     int markFailedIfNotEvaluated(@Param("id") UUID id);
 
     boolean existsByIdeaIdAndAiFeedbackStartingWith(UUID ideaId, String prefix);
+
+    @Query("""
+                SELECT COUNT(v)
+                FROM IdeaVersion v
+                WHERE v.idea.user.id = :userId
+            """)
+    long countByUserId(@Param("userId") UUID userId);
+
+    @Query("""
+                SELECT AVG(v.totalScore)
+                FROM IdeaVersion v
+                WHERE v.idea.user.id = :userId
+                AND v.totalScore IS NOT NULL
+            """)
+    Double avgScoreByUserId(@Param("userId") UUID userId);
+
+    @Query("""
+                SELECT MAX(v.totalScore)
+                FROM IdeaVersion v
+                WHERE v.idea.user.id = :userId
+            """)
+    Double bestScoreByUserId(@Param("userId") UUID userId);
+
+    @Query("""
+                SELECT v
+                FROM IdeaVersion v
+                WHERE v.idea.user.id = :userId
+                AND v.totalScore IS NOT NULL
+                ORDER BY v.totalScore DESC
+            """)
+    List<IdeaVersion> findTopByUserIdOrderByScoreDesc(
+            @Param("userId") UUID userId,
+            Pageable pageable);
 }

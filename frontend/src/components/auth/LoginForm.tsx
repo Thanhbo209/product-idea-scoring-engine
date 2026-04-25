@@ -2,8 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
-import { authApi } from "@/lib/authApi";
 import { useState } from "react";
+import { authApi } from "@/lib/authApi";
 
 export const LoginForm = () => {
   const router = useRouter();
