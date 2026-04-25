@@ -1,4 +1,4 @@
-import axios from "axios";
+import { api } from "@/lib/api";
 import type {
   CreateIdeaRequest,
   CreateVersionRequest,
@@ -9,49 +9,46 @@ import type {
   PageResponse,
 } from "@/types/idea";
 
-const client = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080/api/v1",
-  withCredentials: true, // cookie-based auth
-  headers: { "Content-Type": "application/json" },
-});
-
-// ── Idea ──────────────────────────────────────────────────────────────────────
+const BASE = "/api/v1";
 
 export const ideaApi = {
-  createIdea: (data: CreateIdeaRequest) =>
-    client.post<IdeaDetailResponse>("/ideas", data).then((r) => r.data),
+  // ── Idea ────────────────────────────────────────────────────────────────────
 
-  getIdeas: (params?: { status?: string; page?: number; size?: number }) =>
-    client
-      .get<PageResponse<IdeaSummaryResponse>>("/ideas", { params })
-      .then((r) => r.data),
+  createIdea: (data: CreateIdeaRequest) =>
+    api.post<IdeaDetailResponse>(`${BASE}/ideas`, data),
+
+  getIdeas: (params?: { status?: string; page?: number; size?: number }) => {
+    const query = new URLSearchParams();
+    if (params?.status) query.set("status", params.status);
+    if (params?.page !== undefined) query.set("page", String(params.page));
+    if (params?.size !== undefined) query.set("size", String(params.size));
+    const qs = query.toString();
+    return api.get<PageResponse<IdeaSummaryResponse>>(
+      `${BASE}/ideas${qs ? `?${qs}` : ""}`,
+    );
+  },
 
   getIdea: (ideaId: string) =>
-    client.get<IdeaDetailResponse>(`/ideas/${ideaId}`).then((r) => r.data),
+    api.get<IdeaDetailResponse>(`${BASE}/ideas/${ideaId}`),
 
-  // ── Version ────────────────────────────────────────────────────────────────
+  // ── Version ──────────────────────────────────────────────────────────────────
 
   createVersion: (ideaId: string, data: CreateVersionRequest) =>
-    client
-      .post<IdeaVersionResponse>(`/ideas/${ideaId}/versions`, data)
-      .then((r) => r.data),
+    api.post<IdeaVersionResponse>(`${BASE}/ideas/${ideaId}/versions`, data),
 
   getVersions: (ideaId: string) =>
-    client
-      .get<IdeaVersionResponse[]>(`/ideas/${ideaId}/versions`)
-      .then((r) => r.data),
+    api.get<IdeaVersionResponse[]>(`${BASE}/ideas/${ideaId}/versions`),
 
-  // ── AI Evaluation ──────────────────────────────────────────────────────────
+  // ── AI Evaluation ────────────────────────────────────────────────────────────
 
   triggerEvaluation: (ideaId: string, versionId: string) =>
-    client
-      .post<void>(`/ideas/${ideaId}/versions/${versionId}/evaluate`)
-      .then((r) => r.data),
+    api.post<void>(
+      `${BASE}/ideas/${ideaId}/versions/${versionId}/evaluate`,
+      {},
+    ),
 
   getEvaluationStatus: (ideaId: string, versionId: string) =>
-    client
-      .get<EvaluationStatusResponse>(
-        `/ideas/${ideaId}/versions/${versionId}/evaluate/status`,
-      )
-      .then((r) => r.data),
+    api.get<EvaluationStatusResponse>(
+      `${BASE}/ideas/${ideaId}/versions/${versionId}/evaluate/status`,
+    ),
 };
