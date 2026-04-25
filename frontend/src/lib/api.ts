@@ -16,14 +16,6 @@ async function request<T>(
     "Content-Type": "application/json",
   };
 
-  // JWT support (nếu có)
-  const token =
-    typeof window !== "undefined" ? localStorage.getItem("token") : null;
-
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
-  }
-
   const res = await fetch(`${BASE_URL}${endpoint}`, {
     method,
     headers,
