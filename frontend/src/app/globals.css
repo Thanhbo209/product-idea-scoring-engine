@@ -37,11 +37,12 @@
   --sidebar-accent-foreground: #28282d;
   --sidebar-border: #d9d9dc;
   --sidebar-ring: #00b0f4;
-  --font-sans: Noto Sans JP, ui-sans-serif, sans-serif, system-ui;
-  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-sans: "Noto Sans JP", ui-sans-serif, sans-serif, system-ui;
+  --font-serif:
+    ui-serif, "Georgia", "Cambria", "Times New Roman", "Times", serif;
   --font-mono:
-    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
-    "Courier New", monospace;
+    ui-monospace, "SFMono-Regular", "Menlo", "Monaco", "Consolas",
+    "Liberation Mono", "Courier New", monospace;
   --radius: 0.625rem;
   --shadow-x: 0;
   --shadow-y: 1px;
