@@ -1,4 +1,9 @@
 # backend/src/test/resources/application-test.yml
+app:
+  jwt:
+    secret: test-secret-key
+    expiration-ms: 3600000
+
 spring:
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/idea_validator_test}
