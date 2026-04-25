@@ -1,3 +1,4 @@
+# backend/src/main/resources/application.yml
 spring:
   application:
     name: product-idea-validator
