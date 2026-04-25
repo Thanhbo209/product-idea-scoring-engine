@@ -22,11 +22,7 @@ function VersionItem({
 
   return (
     <div className="border border-border rounded-xl overflow-hidden">
-      <div
-        onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center justify-between px-4 py-3
-                   bg-card hover:bg-accent transition-colors text-left"
-      >
+      <div className="w-full flex items-center justify-between px-4 py-3 bg-card">
         <div className="flex items-center gap-3">
           <span className="text-xs font-mono bg-secondary px-2 py-0.5 rounded text-muted-foreground">
             v{version.versionNumber}
@@ -47,11 +43,15 @@ function VersionItem({
             versionId={version.id}
             initialStatus={version.evaluationStatus}
           />
-          {open ? (
-            <ChevronUp size={14} className="text-muted-foreground" />
-          ) : (
-            <ChevronDown size={14} className="text-muted-foreground" />
-          )}
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            aria-expanded={open}
+            aria-label={open ? "Collapse version" : "Expand version"}
+            className="p-1 rounded hover:bg-accent"
+          >
+            {open ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+          </button>
         </div>
       </div>
 
