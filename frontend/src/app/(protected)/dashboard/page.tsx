@@ -57,7 +57,7 @@ export default function DashboardPage() {
   const { user } = useAuthStore();
   const firstName = user?.fullName?.split(" ")[0] ?? "there";
 
-  const { data, isLoading } = useIdeas({ size: 5 });
+  const { data, isLoading } = useIdeas({ status, page: 0 });
 
   const ideas = data?.content ?? [];
   const totalIdeas = data?.totalElements ?? 0;
@@ -82,17 +82,17 @@ export default function DashboardPage() {
       icon: Lightbulb,
     },
     {
-      label: "Avg score",
+      label: "Avg score (recent)",
       value: isLoading ? "—" : avgScore != null ? avgScore.toFixed(1) : "—",
       icon: BarChart3,
     },
     {
-      label: "Total refinements",
+      label: "Total refinements (recent)",
       value: isLoading ? "—" : String(totalRefinements),
       icon: GitBranch,
     },
     {
-      label: "Best score",
+      label: "Best score (recent)",
       value: isLoading ? "—" : bestScore != null ? bestScore.toFixed(1) : "—",
       icon: TrendingUp,
     },
@@ -148,6 +148,9 @@ export default function DashboardPage() {
                   </p>
                   <p className="text-xs text-muted-foreground mt-0.5">
                     {label}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground/60">
+                    Based on latest 5 ideas
                   </p>
                 </div>
               </div>

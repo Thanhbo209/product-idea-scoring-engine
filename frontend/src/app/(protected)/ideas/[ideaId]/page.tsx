@@ -18,8 +18,6 @@ export default function IdeaDetailPage() {
   const params = useParams();
   const ideaId = params?.ideaId as string | undefined;
 
-  console.log("ideaId:", ideaId);
-
   const { data: idea, isLoading, isError } = useIdea(ideaId ?? "");
 
   // guard cứng
